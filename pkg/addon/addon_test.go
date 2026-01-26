@@ -31,7 +31,7 @@ func TestGetDefaultValues(t *testing.T) {
 			expectedValues: map[string]interface{}{
 				"KubeConfigSecret": "basic-addon-hub-kubeconfig",
 				"ClusterName":      "cluster1",
-				"Image":            DefaultBasicAddonImage,
+				"Image":            DefaultAddonImage,
 			},
 		},
 		{

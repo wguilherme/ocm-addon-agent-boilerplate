@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: basic-addon-controller
+  name: ocm-addon-boilerplate-controller
   namespace: open-cluster-management
   labels:
-    app: basic-addon-controller
+    app: ocm-addon-boilerplate-controller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: basic-addon-controller
+      app: ocm-addon-boilerplate-controller
   template:
     metadata:
       labels:
-        app: basic-addon-controller
+        app: ocm-addon-boilerplate-controller
     spec:
-      serviceAccountName: basic-addon-sa
+      serviceAccountName: ocm-addon-boilerplate-sa
       containers:
         - name: controller
-          image: basic-addon:latest
+          image: ocm-addon-boilerplate:latest
           imagePullPolicy: IfNotPresent
           args:
             - "controller"
           env:
             - name: ADDON_IMAGE
-              value: "basic-addon:latest"
+              value: "ocm-addon-boilerplate:latest"

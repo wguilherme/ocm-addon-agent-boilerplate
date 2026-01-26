@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: basic-addon-agent
+  name: ocm-addon-boilerplate-agent
   namespace: {{ .AddonInstallNamespace }}
   labels:
-    app: basic-addon-agent
+    app: ocm-addon-boilerplate-agent
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: basic-addon-agent
+      app: ocm-addon-boilerplate-agent
   template:
     metadata:
       labels:
-        app: basic-addon-agent
+        app: ocm-addon-boilerplate-agent
     spec:
-      serviceAccountName: basic-addon-agent-sa
+      serviceAccountName: ocm-addon-boilerplate-agent-sa
       volumes:
       - name: hub-config
         secret:

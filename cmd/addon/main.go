@@ -24,7 +24,6 @@ import (
 	"github.com/totvs/addon-framework-basic/pkg/agent"
 )
 
-// esta função serve para 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -32,16 +31,15 @@ func main() {
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 
 	command := newCommand()
-	// teste 
 	if err := command.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)		
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}
 }
 
 func newCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "addon",
-		Short: "basic-addon - OCM addon for collecting pod reports",
+		Short: fmt.Sprintf("%s - OCM addon boilerplate", addon.AddonName),
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := cmd.Help(); err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -64,7 +62,7 @@ func newCommand() *cobra.Command {
 
 func newControllerCommand() *cobra.Command {
 	cmd := cmdfactory.
-		NewControllerCommandConfig("basic-addon-controller", version.Get(), runController).
+		NewControllerCommandConfig(addon.AddonName+"-controller", version.Get(), runController).
 		NewCommand()
 	cmd.Use = "controller"
 	cmd.Short = "Start the addon controller"
@@ -73,7 +71,7 @@ func newControllerCommand() *cobra.Command {
 }
 
 func runController(ctx context.Context, kubeConfig *rest.Config) error {
-	klog.Info("Starting basic-addon controller")
+	klog.Infof("Starting %s controller", addon.AddonName)
 
 	mgr, err := addonmanager.New(kubeConfig)
 	if err != nil {

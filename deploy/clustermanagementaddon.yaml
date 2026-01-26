@@ -1,11 +1,11 @@
 apiVersion: addon.open-cluster-management.io/v1alpha1
 kind: ClusterManagementAddOn
 metadata:
-  name: basic-addon
+  name: ocm-addon-boilerplate
 spec:
   addOnMeta:
-    displayName: Basic Addon
-    description: "Basic addon example that logs hello world on managed clusters"
+    displayName: OCM Addon Boilerplate
+    description: "OCM addon boilerplate demonstrating multiple spoke-hub communication strategies"
   installStrategy:
     type: Placements
     placements:
