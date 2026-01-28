@@ -1,4 +1,28 @@
-package reports
+package contracts
+
+import "time"
+
+// ClusterInventoryReport é o report final agregado enviado para o hub.
+// Contém análise de recursos do cluster.
+//
+// Exemplo de uso:
+//
+//	report := ClusterInventoryReport{
+//	    ClusterName: "spoke1-sftm",
+//	    Timestamp:   time.Now().UTC(),
+//	    PodAnalysis: &PodAnalysis{...}, // Preenchido por PodAnalyzer
+//	}
+type ClusterInventoryReport struct {
+	// ClusterName identifica o cluster spoke de origem
+	ClusterName string `json:"clusterName"`
+
+	// Timestamp indica quando o report foi gerado
+	Timestamp time.Time `json:"timestamp"`
+
+	// PodAnalysis contém análise de pods (opcional)
+	// Preenchido por PodAnalyzer
+	PodAnalysis *PodAnalysis `json:"podAnalysis,omitempty"`
+}
 
 // PodAnalysis representa a análise de pods do cluster.
 // Gerado por PodAnalyzer (PodCollector + PodProcessor).

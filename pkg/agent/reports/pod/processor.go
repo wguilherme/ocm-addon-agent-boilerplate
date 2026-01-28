@@ -7,22 +7,21 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/totvs/addon-framework-basic/pkg/agent/contracts"
-	"github.com/totvs/addon-framework-basic/pkg/agent/reports"
 )
 
 type podProcessor struct{}
 
-func NewPodProcessor() contracts.Processor[corev1.Pod, reports.PodAnalysis] {
+func NewPodProcessor() contracts.Processor[corev1.Pod, contracts.PodAnalysis] {
 	return &podProcessor{}
 }
 
-func (p *podProcessor) Process(ctx context.Context, pods []corev1.Pod, clusterName string) (reports.PodAnalysis, error) {
+func (p *podProcessor) Process(ctx context.Context, pods []corev1.Pod, clusterName string) (contracts.PodAnalysis, error) {
 	klog.V(4).Infof("[PodProcessor] Processing %d pods for cluster '%s'", len(pods), clusterName)
 
-	analysis := reports.PodAnalysis{
+	analysis := contracts.PodAnalysis{
 		TotalPods:   len(pods),
 		PodsByPhase: make(map[string]int),
-		Pods:        make([]reports.PodInfo, 0, len(pods)),
+		Pods:        make([]contracts.PodInfo, 0, len(pods)),
 	}
 
 	for _, pod := range pods {
@@ -38,7 +37,7 @@ func (p *podProcessor) Process(ctx context.Context, pods []corev1.Pod, clusterNa
 			analysis.FailedPods++
 		}
 
-		analysis.Pods = append(analysis.Pods, reports.PodInfo{
+		analysis.Pods = append(analysis.Pods, contracts.PodInfo{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 			Phase:     phase,

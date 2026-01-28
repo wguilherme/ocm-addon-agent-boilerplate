@@ -12,7 +12,10 @@ import (
 	cmdfactory "open-cluster-management.io/addon-framework/pkg/cmd/factory"
 	"open-cluster-management.io/addon-framework/pkg/version"
 
-	"github.com/totvs/addon-framework-basic/pkg/agent/strategies"
+	"github.com/totvs/addon-framework-basic/pkg/agent/contracts"
+	"github.com/totvs/addon-framework-basic/pkg/agent/orchestrators"
+	"github.com/totvs/addon-framework-basic/pkg/agent/reports/pod"
+	"github.com/totvs/addon-framework-basic/pkg/agent/transmitters"
 )
 
 // NewAgentCommand creates the agent subcommand.
@@ -51,7 +54,7 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 	klog.Infof("Connected to hub cluster, will report to namespace: %s", o.SpokeClusterName)
 
 	// Create sync configuration
-	syncConfig := &strategies.SyncConfig{
+	syncConfig := &contracts.SyncConfig{
 		SpokeClusterName: o.SpokeClusterName,
 		AddonName:        o.AddonName,
 		AddonNamespace:   o.AddonNamespace,
@@ -59,10 +62,17 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 		HubClient:        hubClient,
 	}
 
-	// Initialize strategies (Strategy Pattern)
-	syncStrategies := []strategies.SyncStrategy{
-		strategies.NewHelloStrategy(),     // Simple hello log
-		strategies.NewCollectorStrategy(), // Collect pods and send to hub
+	// Initialize sync services (explicit DI)
+	syncServices := []contracts.SyncService{
+		orchestrators.NewInventoryOrchestrator(
+			pod.NewPodAnalyzer(
+				pod.NewPodCollector(),
+				pod.NewPodProcessor(),
+			),
+			transmitters.NewConfigMapTransmitter("cluster-inventory-report"),
+		),
+		// Future: orchestrators.NewMetricsOrchestrator(...),
+		// Future: orchestrators.NewEventsOrchestrator(...),
 	}
 
 	// Start sync loop
@@ -70,7 +80,7 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 	defer ticker.Stop()
 
 	// Run immediately once, then on ticker
-	runAllStrategies(ctx, syncStrategies, syncConfig)
+	runAllServices(ctx, syncServices, syncConfig)
 
 	for {
 		select {
@@ -78,16 +88,16 @@ func (o *AgentOptions) RunAgent(ctx context.Context, kubeconfig *rest.Config) er
 			klog.Info("Agent shutting down")
 			return nil
 		case <-ticker.C:
-			runAllStrategies(ctx, syncStrategies, syncConfig)
+			runAllServices(ctx, syncServices, syncConfig)
 		}
 	}
 }
 
-// runAllStrategies executes all sync strategies and logs errors individually.
-func runAllStrategies(ctx context.Context, strats []strategies.SyncStrategy, config *strategies.SyncConfig) {
-	for _, strategy := range strats {
-		if err := strategy.Sync(ctx, config); err != nil {
-			klog.Errorf("Failed to sync %s: %v", strategy.Name(), err)
+// runAllServices executes all sync services and logs errors individually.
+func runAllServices(ctx context.Context, services []contracts.SyncService, config *contracts.SyncConfig) {
+	for _, service := range services {
+		if err := service.Sync(ctx, config); err != nil {
+			klog.Errorf("Failed to sync %s: %v", service.Name(), err)
 		}
 	}
 }

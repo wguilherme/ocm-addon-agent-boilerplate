@@ -11,7 +11,6 @@ import (
 
 	"github.com/totvs/addon-framework-basic/pkg/agent/contracts"
 	agenterrors "github.com/totvs/addon-framework-basic/pkg/agent/errors"
-	"github.com/totvs/addon-framework-basic/pkg/agent/reports"
 )
 
 // configMapTransmitter → cria/atualiza ConfigMap no hub cluster.
@@ -30,7 +29,7 @@ func NewConfigMapTransmitter(configMapName string) contracts.Transmitter {
 	}
 }
 
-func (t *configMapTransmitter) Transmit(ctx context.Context, report reports.ClusterInventoryReport, config *contracts.SyncConfig) error {
+func (t *configMapTransmitter) Transmit(ctx context.Context, report contracts.ClusterInventoryReport, config *contracts.SyncConfig) error {
 	if config == nil {
 		return agenterrors.ErrNilConfig
 	}

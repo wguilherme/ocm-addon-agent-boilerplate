@@ -10,26 +10,25 @@ import (
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/totvs/addon-framework-basic/pkg/agent/analyzers/pod"
 	"github.com/totvs/addon-framework-basic/pkg/agent/contracts"
 	agenterrors "github.com/totvs/addon-framework-basic/pkg/agent/errors"
 	"github.com/totvs/addon-framework-basic/pkg/agent/mocks"
-	"github.com/totvs/addon-framework-basic/pkg/agent/reports"
+	"github.com/totvs/addon-framework-basic/pkg/agent/reports/pod"
 )
 
 // PodAnalyzerTestSuite agrupa testes do PodAnalyzer.
 type PodAnalyzerTestSuite struct {
 	suite.Suite
 	mockCollector *mocks.MockCollector[corev1.Pod]
-	mockProcessor *mocks.MockProcessor[corev1.Pod, reports.PodAnalysis]
-	analyzer      contracts.Analyzer[corev1.Pod, reports.PodAnalysis]
+	mockProcessor *mocks.MockProcessor[corev1.Pod, contracts.PodAnalysis]
+	analyzer      contracts.Analyzer[corev1.Pod, contracts.PodAnalysis]
 	config        *contracts.SyncConfig
 }
 
 // SetupTest configura mocks antes de cada teste.
 func (s *PodAnalyzerTestSuite) SetupTest() {
 	s.mockCollector = new(mocks.MockCollector[corev1.Pod])
-	s.mockProcessor = new(mocks.MockProcessor[corev1.Pod, reports.PodAnalysis])
+	s.mockProcessor = new(mocks.MockProcessor[corev1.Pod, contracts.PodAnalysis])
 	s.analyzer = pod.NewPodAnalyzer(s.mockCollector, s.mockProcessor)
 	s.config = &contracts.SyncConfig{
 		SpokeClusterName: "test-cluster",
@@ -69,7 +68,7 @@ func (s *PodAnalyzerTestSuite) TestProcessingError() {
 
 	s.mockCollector.On("Collect", mock.Anything, s.config).Return(pods, nil)
 	s.mockProcessor.On("Process", mock.Anything, pods, "test-cluster").
-		Return(reports.PodAnalysis{}, expectedErr)
+		Return(contracts.PodAnalysis{}, expectedErr)
 	s.mockProcessor.On("Name").Return("PodProcessor")
 
 	// Act
@@ -96,7 +95,7 @@ func (s *PodAnalyzerTestSuite) TestSuccessfulAnalysis() {
 		{Status: corev1.PodStatus{Phase: corev1.PodPending}},
 	}
 
-	expectedAnalysis := reports.PodAnalysis{
+	expectedAnalysis := contracts.PodAnalysis{
 		TotalPods:   2,
 		RunningPods: 1,
 		PendingPods: 1,
